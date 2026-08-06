@@ -10,7 +10,8 @@
       "!!**/apps/api/dist",
       "!!**/test",
       "!!**/generated",
-      "!!**/.agents"
+      "!!**/.agents",
+      "!!apps/web/src/components/ui"
     ]
   },
   "linter": {
@@ -18,6 +19,14 @@
     "rules": {
       "style": {
         "useImportType": "off"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "level": "warn",
+          "options": {
+            "functions": ["cn", "clsx", "cva"]
+          }
+        }
       }
     }
   },
