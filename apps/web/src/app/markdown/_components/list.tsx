@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useGetMarkdownList } from "@/generated/api";
 
 export default function List() {
@@ -12,7 +13,9 @@ export default function List() {
   return (
     <div>
       {data?.data.map((item) => (
-        <div key={item.id}>{item.title}</div>
+        <div key={item.id}>
+          <Link href={`/markdown/${item.id}`}>{item.title}</Link>
+        </div>
       ))}
     </div>
   );

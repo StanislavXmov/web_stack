@@ -39,6 +39,19 @@ export class MarkdownController {
   }
 
   @Get(":id")
+  @ApiOperation({
+    summary: "Get a markdown by id",
+    operationId: "getMarkdownById",
+  })
+  @ApiResponse({
+    status: 200,
+    type: MarkdownDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Markdown not found",
+    type: HttpErrorDto,
+  })
   findOne(@Param("id") id: string) {
     return this.markdownService.findOne(id);
   }
