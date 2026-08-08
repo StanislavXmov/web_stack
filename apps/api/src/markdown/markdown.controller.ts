@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -19,6 +21,20 @@ export class MarkdownController {
   constructor(private readonly markdownService: MarkdownService) {}
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: "Create a markdown",
+    operationId: "createMarkdown",
+  })
+  @ApiResponse({
+    status: 201,
+    type: MarkdownDto,
+  })
+  @ApiResponse({
+    status: 409,
+    description: "Markdown with this slug already exists",
+    type: HttpErrorDto,
+  })
   create(@Body() createMarkdownDto: CreateMarkdownDto) {
     return this.markdownService.create(createMarkdownDto);
   }
