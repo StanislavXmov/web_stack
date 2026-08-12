@@ -1,5 +1,7 @@
 import { getMarkdownById } from "@/generated/api";
-import Markdown from "./_components/markdown";
+import { Display } from "../_components/display";
+import { Label } from "../_components/label";
+import Markdown from "../_components/markdown";
 
 export default async function Page({
   params,
@@ -12,10 +14,8 @@ export default async function Page({
   if (!data) {
     return (
       <div className="space-y-4">
-        <p className="marathon-label">[SYSTEM STATUS: CRITICAL]</p>
-        <h1 className="marathon-display text-4xl text-white">
-          Markdown not found
-        </h1>
+        <Label>[SYSTEM STATUS: CRITICAL]</Label>
+        <Display className="text-4xl text-white">Markdown not found</Display>
         <p className="text-(--m-muted) text-sm tracking-wide">
           Transmission `{id}` is missing from the archive.
         </p>

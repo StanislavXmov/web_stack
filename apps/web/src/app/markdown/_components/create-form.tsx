@@ -1,7 +1,6 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import {
@@ -11,6 +10,13 @@ import {
 } from "@/generated/api";
 import { MarkdownControllerCreateBody } from "@/generated/api.zod";
 import { ApiError } from "@/lib/api-fetch";
+import { Button, ButtonLink } from "./button";
+import { Display } from "./display";
+import { Dots } from "./dots";
+import { Frame } from "./frame";
+import { Input } from "./input";
+import { Label } from "./label";
+import { Textarea } from "./textarea";
 
 function slugify(value: string) {
   return value
@@ -90,25 +96,21 @@ export default function CreateForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-3">
-          <p className="marathon-label">System {/* Compose */}</p>
-          <h1 className="marathon-display text-[clamp(2.2rem,7vw,4.5rem)] text-white">
+          <Label>System {/* Compose */}</Label>
+          <Display className="text-[clamp(2.2rem,7vw,4.5rem)] text-white">
             New File
-          </h1>
+          </Display>
           <p className="max-w-md text-(--m-muted) text-sm tracking-wide">
             Enter core parameters, paste markdown markup, then transmit.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link href="/markdown" className="marathon-btn marathon-btn--ghost">
+          <ButtonLink href="/markdown" variant="ghost">
             Cancel
-          </Link>
-          <button
-            type="submit"
-            className="marathon-btn"
-            disabled={create.isPending}
-          >
+          </ButtonLink>
+          <Button type="submit" disabled={create.isPending}>
             {create.isPending ? "Sending…" : "Transmit"}
-          </button>
+          </Button>
         </div>
       </header>
 
@@ -119,25 +121,18 @@ export default function CreateForm() {
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
-        <aside className="marathon-frame space-y-5 p-4 md:p-5">
+        <Frame className="space-y-5 p-4 md:p-5" as="aside">
           <div className="flex items-center justify-between gap-3">
-            <p className="marathon-label">Parameters</p>
-            <div className="marathon-dots" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-            </div>
+            <Label>Parameters</Label>
+            <Dots count={8} />
           </div>
 
-          <label className="block space-y-2">
-            <span className="marathon-label">Title</span>
-            <input
-              className="marathon-input"
+          <div className="block space-y-2">
+            <Label as="label" htmlFor="markdown-title">
+              Title
+            </Label>
+            <Input
+              id="markdown-title"
               value={title}
               onChange={(event) => handleTitleChange(event.target.value)}
               placeholder="Getting Started"
@@ -149,12 +144,14 @@ export default function CreateForm() {
                 {fieldErrors.title}
               </span>
             ) : null}
-          </label>
+          </div>
 
-          <label className="block space-y-2">
-            <span className="marathon-label">Slug</span>
-            <input
-              className="marathon-input"
+          <div className="block space-y-2">
+            <Label as="label" htmlFor="markdown-slug">
+              Slug
+            </Label>
+            <Input
+              id="markdown-slug"
               value={slug}
               onChange={(event) => {
                 setSlugTouched(true);
@@ -169,7 +166,7 @@ export default function CreateForm() {
                 {fieldErrors.slug}
               </span>
             ) : null}
-          </label>
+          </div>
 
           <dl className="space-y-2 border-(--m-line) border-t border-dashed pt-4 text-(--m-muted) text-xs uppercase tracking-[0.16em]">
             <div className="flex justify-between gap-3">
@@ -181,19 +178,21 @@ export default function CreateForm() {
               <dd className="text-white">Persist note</dd>
             </div>
           </dl>
-        </aside>
+        </Frame>
 
-        <section className="marathon-frame space-y-4 p-4 md:p-5">
+        <Frame className="space-y-4 p-4 md:p-5">
           <div className="flex items-center justify-between gap-3">
-            <p className="marathon-label">Markdown payload</p>
+            <Label>Markdown payload</Label>
             <span className="text-(--m-muted) text-xs uppercase tracking-[0.18em]">
               SDR37 {/* Terminal */}
             </span>
           </div>
-          <label className="block space-y-2">
-            <span className="sr-only">Markdown content</span>
-            <textarea
-              className="marathon-textarea"
+          <div className="block space-y-2">
+            <label htmlFor="markdown-content" className="sr-only">
+              Markdown content
+            </label>
+            <Textarea
+              id="markdown-content"
               value={content}
               onChange={(event) => setContent(event.target.value)}
               placeholder={"# Heading\n\nWrite markdown here…"}
@@ -204,8 +203,8 @@ export default function CreateForm() {
                 {fieldErrors.content}
               </span>
             ) : null}
-          </label>
-        </section>
+          </div>
+        </Frame>
       </div>
     </form>
   );

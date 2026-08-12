@@ -1,13 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { useGetMarkdownList } from "@/generated/api";
+import { Display } from "./display";
+import { Label } from "./label";
+import { Row } from "./row";
 
 export default function List() {
   const { data, isLoading, error } = useGetMarkdownList();
 
   if (isLoading) {
-    return <p className="marathon-label py-6">[SYSTEM STATUS: LOADING]</p>;
+    return <Label className="py-6">[SYSTEM STATUS: LOADING]</Label>;
   }
 
   if (error) {
@@ -21,7 +23,7 @@ export default function List() {
   if (!data?.data?.length) {
     return (
       <div className="space-y-3 py-6">
-        <p className="marathon-label">[SYSTEM STATUS: EMPTY]</p>
+        <Label>[SYSTEM STATUS: EMPTY]</Label>
         <p className="text-(--m-muted) text-sm">
           No transmissions on file. Create the first entry.
         </p>
@@ -33,11 +35,11 @@ export default function List() {
     <ul className="flex flex-col">
       {data.data.map((item, index) => (
         <li key={item.id}>
-          <Link href={`/markdown/${item.id}`} className="marathon-row">
+          <Row href={`/markdown/${item.id}`}>
             <span className="flex min-w-0 flex-col gap-1">
-              <span className="marathon-display text-xl md:text-2xl">
+              <Display as="span" className="text-xl md:text-2xl">
                 {item.title}
-              </span>
+              </Display>
               <span className="truncate text-xs uppercase tracking-[0.18em] opacity-70">
                 {item.slug}
               </span>
@@ -45,7 +47,7 @@ export default function List() {
             <span className="shrink-0 text-xs tabular-nums tracking-[0.2em] opacity-70">
               {String(index + 1).padStart(2, "0")}
             </span>
-          </Link>
+          </Row>
         </li>
       ))}
     </ul>
