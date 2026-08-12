@@ -94,7 +94,7 @@ export default function CreateForm() {
           <h1 className="marathon-display text-[clamp(2.2rem,7vw,4.5rem)] text-white">
             New File
           </h1>
-          <p className="max-w-md text-[color:var(--m-muted)] text-sm tracking-wide">
+          <p className="max-w-md text-(--m-muted) text-sm tracking-wide">
             Enter core parameters, paste markdown markup, then transmit.
           </p>
         </div>
@@ -113,7 +113,7 @@ export default function CreateForm() {
       </header>
 
       {formError ? (
-        <p className="border-2 border-[color:var(--m-ink)] bg-[color:var(--m-lime)] px-3 py-2 font-semibold text-[color:var(--m-ink)] text-sm tracking-wide">
+        <p className="border-(--m-ink) border-2 bg-(--m-lime) px-3 py-2 font-semibold text-(--m-ink) text-sm tracking-wide">
           [SYSTEM STATUS: CRITICAL] {formError}
         </p>
       ) : null}
@@ -145,7 +145,7 @@ export default function CreateForm() {
               required
             />
             {fieldErrors.title ? (
-              <span className="text-[color:var(--m-lime)] text-xs">
+              <span className="text-(--m-lime) text-xs">
                 {fieldErrors.title}
               </span>
             ) : null}
@@ -165,13 +165,13 @@ export default function CreateForm() {
               required
             />
             {fieldErrors.slug ? (
-              <span className="text-[color:var(--m-lime)] text-xs">
+              <span className="text-(--m-lime) text-xs">
                 {fieldErrors.slug}
               </span>
             ) : null}
           </label>
 
-          <dl className="space-y-2 border-[color:var(--m-line)] border-t border-dashed pt-4 text-[color:var(--m-muted)] text-xs uppercase tracking-[0.16em]">
+          <dl className="space-y-2 border-(--m-line) border-t border-dashed pt-4 text-(--m-muted) text-xs uppercase tracking-[0.16em]">
             <div className="flex justify-between gap-3">
               <dt>Location</dt>
               <dd className="text-white">Draft sector</dd>
@@ -186,7 +186,7 @@ export default function CreateForm() {
         <section className="marathon-frame space-y-4 p-4 md:p-5">
           <div className="flex items-center justify-between gap-3">
             <p className="marathon-label">Markdown payload</p>
-            <span className="text-[color:var(--m-muted)] text-xs uppercase tracking-[0.18em]">
+            <span className="text-(--m-muted) text-xs uppercase tracking-[0.18em]">
               SDR37 {/* Terminal */}
             </span>
           </div>
@@ -200,7 +200,7 @@ export default function CreateForm() {
               required
             />
             {fieldErrors.content ? (
-              <span className="text-[color:var(--m-lime)] text-xs">
+              <span className="text-(--m-lime) text-xs">
                 {fieldErrors.content}
               </span>
             ) : null}

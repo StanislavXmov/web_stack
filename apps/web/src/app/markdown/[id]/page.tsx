@@ -16,7 +16,7 @@ export default async function Page({
         <h1 className="marathon-display text-4xl text-white">
           Markdown not found
         </h1>
-        <p className="text-[color:var(--m-muted)] text-sm tracking-wide">
+        <p className="text-(--m-muted) text-sm tracking-wide">
           Transmission `{id}` is missing from the archive.
         </p>
       </div>

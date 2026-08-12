@@ -12,7 +12,7 @@ export default function List() {
 
   if (error) {
     return (
-      <p className="py-6 font-medium text-[color:var(--m-lime)] tracking-wide">
+      <p className="py-6 font-medium text-(--m-lime) tracking-wide">
         [SYSTEM STATUS: CRITICAL] {error.message}
       </p>
     );
@@ -22,7 +22,7 @@ export default function List() {
     return (
       <div className="space-y-3 py-6">
         <p className="marathon-label">[SYSTEM STATUS: EMPTY]</p>
-        <p className="text-[color:var(--m-muted)] text-sm">
+        <p className="text-(--m-muted) text-sm">
           No transmissions on file. Create the first entry.
         </p>
       </div>

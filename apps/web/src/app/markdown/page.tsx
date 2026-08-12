@@ -10,7 +10,7 @@ export default function Page() {
           <h1 className="marathon-display text-[clamp(2.5rem,8vw,5rem)] text-white">
             Markdown
           </h1>
-          <p className="max-w-md text-[color:var(--m-muted)] text-sm tracking-wide">
+          <p className="max-w-md text-(--m-muted) text-sm tracking-wide">
             Operational notes archive. Select a file or open a new transmission.
           </p>
         </div>

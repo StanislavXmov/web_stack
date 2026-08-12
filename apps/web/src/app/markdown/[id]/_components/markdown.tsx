@@ -17,7 +17,7 @@ export default function Markdown({ markdown }: { markdown: MarkdownDto }) {
           <h1 className="marathon-display text-[clamp(2.2rem,7vw,4.5rem)] text-white">
             {markdown.title}
           </h1>
-          <div className="flex flex-wrap gap-x-5 gap-y-2 text-[color:var(--m-muted)] text-xs uppercase tracking-[0.18em]">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-(--m-muted) text-xs uppercase tracking-[0.18em]">
             <span>
               Slug {/*  */}
               {markdown.slug}
@@ -38,7 +38,7 @@ export default function Markdown({ markdown }: { markdown: MarkdownDto }) {
       </header>
 
       <section className="marathon-frame p-4 md:p-6">
-        <div className="mb-5 flex items-center justify-between gap-3 border-[color:var(--m-line)] border-b border-dashed pb-3">
+        <div className="mb-5 flex items-center justify-between gap-3 border-(--m-line) border-b border-dashed pb-3">
           <p className="marathon-label">Rendered payload</p>
           <div className="marathon-dots" aria-hidden="true">
             <span />
