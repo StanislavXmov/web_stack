@@ -1,0 +1,91 @@
+.marathon-ui {
+  --bg: oklch(98% 0.005 250);
+  --surface: oklch(100% 0 0);
+  --fg: oklch(22% 0.02 240);
+  --muted: oklch(50% 0.018 240);
+  --border: oklch(90% 0.008 240);
+  --accent: oklch(58% 0.16 145);
+  --signal: #c8ff1a;
+  --hazard: #ff5c35;
+  --void: #0a0d10;
+  --alloy: #e8edf0;
+  --info: #29d6e8;
+  --critical: #ff315a;
+  --panel: #fff;
+  --line: #cbd3d8;
+  --shadow: rgba(12, 18, 22, 0.12);
+  --pad: clamp(22px, 3vw, 52px);
+  --font-mu-body:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+
+  /* Align Tailwind theme utilities (text-muted, border-border) with Marathon tokens */
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mu-body);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+.marathon-ui[data-theme="dark"] {
+  --bg: oklch(15% 0.018 240);
+  --surface: oklch(19% 0.018 240);
+  --fg: oklch(94% 0.01 240);
+  --muted: oklch(70% 0.012 240);
+  --border: oklch(33% 0.018 240);
+  --panel: #151a1f;
+  --line: #354049;
+  --shadow: rgba(0, 0, 0, 0.35);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+}
+
+.marathon-ui[data-density="compact"] {
+  --pad: clamp(16px, 2vw, 32px);
+}
+
+.marathon-ui[data-density="compact"] [data-mu-block] {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.marathon-ui[data-density="compact"] [data-mu-swatch] {
+  height: 120px;
+}
+
+.marathon-ui[data-density="compact"] [data-mu-demo] {
+  padding: 22px;
+}
+
+.marathon-ui :focus-visible {
+  outline: 3px solid var(--info);
+  outline-offset: 3px;
+}
+
+.marathon-ui a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.marathon-ui code {
+  font-family: var(--font-mu-mono), ui-monospace, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marathon-ui {
+    scroll-behavior: auto;
+  }
+
+  .marathon-ui * {
+    transition: none;
+  }
+}
