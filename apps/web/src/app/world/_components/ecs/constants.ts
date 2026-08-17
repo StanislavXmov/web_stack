@@ -5,3 +5,4 @@ export const AGENT_SCALE = 0.22;
 export const MAX_DELTA = 1 / 20;
 export const WANDER_MIN = 0.6;
 export const WANDER_MAX = 2.2;
+export const PLAYER_SPEED = 8;
