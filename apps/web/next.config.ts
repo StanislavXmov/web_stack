@@ -9,6 +9,7 @@ const monorepoRoot = path.join(
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: monorepoRoot,
+  transpilePackages: ["three", "@react-three/fiber", "@react-three/drei"],
   turbopack: {
     root: monorepoRoot,
   },
