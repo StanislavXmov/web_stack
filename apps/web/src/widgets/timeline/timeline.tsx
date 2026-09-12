@@ -110,11 +110,15 @@ export function Timeline({
       if (ensureVisible && emblaApi) {
         const visibleSlides = emblaApi.slidesInView();
         if (!visibleSlides.includes(nextIndex)) {
-          emblaApi.scrollTo(nextIndex);
+          if (nextIndex > activeIndex) {
+            emblaApi.scrollNext();
+          } else {
+            emblaApi.scrollPrev();
+          }
         }
       }
     },
-    [emblaApi, items],
+    [activeIndex, emblaApi, items],
   );
 
   const selectPrevious = useCallback(() => {
