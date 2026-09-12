@@ -64,13 +64,9 @@ export function Timeline({
     () => items[initialIndex]?.year,
   );
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
-  const dragStartSnapRef = useRef(0);
-  const dragStartProgressRef = useRef(0);
   const dragStartActiveIndexRef = useRef(initialIndex);
   const dragPreviewIndexRef = useRef(initialIndex);
   const dragPreviewSnapRef = useRef(0);
-  const dragStartsAtLeftEdgeRef = useRef(false);
-  const dragStartsAtRightEdgeRef = useRef(false);
   const dragInProgressRef = useRef(false);
   const dragMovedRef = useRef(false);
   const pointerReleasedRef = useRef(false);
@@ -148,50 +144,30 @@ export function Timeline({
       setPreviewIndex(null);
     };
 
-    const canMoveMarker = (snapDelta: number) =>
-      (snapDelta > 0 && dragStartsAtLeftEdgeRef.current) ||
-      (snapDelta < 0 && dragStartsAtRightEdgeRef.current);
-
     const getDragPreview = (api: EmblaApi) => {
-      const progressDelta = api.scrollProgress() - dragStartProgressRef.current;
-      if (Math.abs(progressDelta) < 0.001) {
-        return {
-          index: dragStartActiveIndexRef.current,
-          snap: dragStartSnapRef.current,
-        };
+      const visibleSlides = api.slidesInView();
+      let index = dragPreviewIndexRef.current;
+      if (visibleSlides.length > 0 && !visibleSlides.includes(index)) {
+        index = Math.min(
+          Math.max(index, visibleSlides[0]),
+          visibleSlides[visibleSlides.length - 1],
+        );
       }
 
-      const direction = Math.sign(progressDelta);
-      if (!canMoveMarker(direction)) {
-        return {
-          index: dragStartActiveIndexRef.current,
-          snap: dragStartSnapRef.current,
-        };
-      }
-
-      const scrollSnaps = api.scrollSnapList();
       const progress = api.scrollProgress();
-      let previewSnap = direction > 0 ? scrollSnaps.length - 1 : 0;
-
-      if (direction > 0) {
-        const incomingSnap = scrollSnaps.findIndex((snap) => snap >= progress);
-        if (incomingSnap !== -1) previewSnap = incomingSnap;
-      } else {
-        for (let index = scrollSnaps.length - 1; index >= 0; index -= 1) {
-          if (scrollSnaps[index] <= progress) {
-            previewSnap = index;
-            break;
-          }
+      const scrollSnaps = api.scrollSnapList();
+      let previewSnap = api.selectedScrollSnap();
+      for (let snapIndex = 0; snapIndex < scrollSnaps.length; snapIndex += 1) {
+        if (
+          Math.abs(scrollSnaps[snapIndex] - progress) <
+          Math.abs(scrollSnaps[previewSnap] - progress)
+        ) {
+          previewSnap = snapIndex;
         }
       }
 
-      const snapDelta = previewSnap - dragStartSnapRef.current;
-
       return {
-        index: Math.min(
-          Math.max(dragStartActiveIndexRef.current + snapDelta, 0),
-          items.length - 1,
-        ),
+        index,
         snap: previewSnap,
       };
     };
@@ -214,17 +190,9 @@ export function Timeline({
     };
 
     const handlePointerDown = (api: EmblaApi) => {
-      const visibleSlides = api.slidesInView();
-      const leftEdgeIndex = visibleSlides[0] ?? activeIndex;
-      const rightEdgeIndex = visibleSlides.at(-1) ?? activeIndex;
-
-      dragStartSnapRef.current = api.selectedScrollSnap();
-      dragStartProgressRef.current = api.scrollProgress();
       dragStartActiveIndexRef.current = activeIndex;
       dragPreviewIndexRef.current = activeIndex;
-      dragPreviewSnapRef.current = dragStartSnapRef.current;
-      dragStartsAtLeftEdgeRef.current = activeIndex === leftEdgeIndex;
-      dragStartsAtRightEdgeRef.current = activeIndex === rightEdgeIndex;
+      dragPreviewSnapRef.current = api.selectedScrollSnap();
       dragInProgressRef.current = true;
       dragMovedRef.current = false;
       pointerReleasedRef.current = false;
@@ -259,6 +227,11 @@ export function Timeline({
     };
 
     const handleSettle = (api: EmblaApi) => {
+      if (!dragInProgressRef.current) return;
+
+      const preview = getDragPreview(api);
+      dragPreviewIndexRef.current = preview.index;
+      dragPreviewSnapRef.current = preview.snap;
       if (!commitDrag(api)) resetDrag();
     };
 
