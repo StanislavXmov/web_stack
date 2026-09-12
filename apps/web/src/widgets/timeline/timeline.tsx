@@ -1,29 +1,9 @@
 "use client";
 
-import useEmblaCarousel, {
-  type UseEmblaCarouselType,
-} from "embla-carousel-react";
+import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-
-export type TimelineEvent = {
-  id: string;
-  text: string;
-};
-
-export type TimelineYear = {
-  year: number;
-  events: readonly TimelineEvent[];
-};
-
-export type TimelineProps = {
-  title: string;
-  items: readonly TimelineYear[];
-  initialYear?: number;
-  className?: string;
-};
-
-type EmblaApi = NonNullable<UseEmblaCarouselType[1]>;
+import { EmblaApi, TimelineProps, TimelineYear } from "./types";
 
 const styles = {
   root: "w-full px-2 py-4 text-zinc-950 sm:px-7 sm:py-6",

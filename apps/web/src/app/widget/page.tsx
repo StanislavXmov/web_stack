@@ -1,4 +1,4 @@
-import { Timeline, type TimelineYear } from "@/app/widget/_components/timeline";
+import { Timeline, type TimelineYear } from "@/widgets/timeline";
 
 const timelineItems = [
   {
