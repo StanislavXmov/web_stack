@@ -1,4 +1,5 @@
-import { Timeline, type TimelineYear } from "@/widgets/timeline";
+import type { TimelineYear } from "@/widgets/timeline";
+import { Time } from "./_components/timeline";
 
 const timelineItems = [
   {
@@ -132,11 +133,7 @@ const timelineItems = [
 export default function Page() {
   return (
     <main className="min-h-screen overflow-x-hidden bg-white sm:py-4">
-      <Timeline
-        title="Гордимся каждым годом"
-        items={timelineItems}
-        initialYear={2005}
-      />
+      <Time items={timelineItems} />
     </main>
   );
 }

@@ -3,10 +3,32 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import {
+  TimelineContext,
+  TimelineItemContext,
+  useTimeline,
+  useTimelineItem,
+} from "./context";
 import { styles } from "./styles";
-import { EmblaApi, TimelineProps, TimelineYear } from "./types";
+import type {
+  ArrowPlaceholderProps,
+  ArrowProps,
+  ContentProps,
+  DotProps,
+  EmblaApi,
+  EmptyProps,
+  EventProps,
+  EventsProps,
+  ItemProps,
+  NavigationProps,
+  RootProps,
+  TickProps,
+  TitleProps,
+  YearLabelProps,
+} from "./types";
+import { findInitialIndex, getDragPreview } from "./utils";
 
-function ArrowPlaceholder({ direction }: { direction: "left" | "right" }) {
+function ArrowPlaceholder({ direction }: ArrowPlaceholderProps) {
   return (
     <span
       aria-hidden="true"
@@ -18,22 +40,16 @@ function ArrowPlaceholder({ direction }: { direction: "left" | "right" }) {
   );
 }
 
-function findInitialIndex(
-  items: readonly TimelineYear[],
-  initialYear: number | undefined,
-) {
-  if (initialYear === undefined) return 0;
-
-  const initialIndex = items.findIndex((item) => item.year === initialYear);
-  return initialIndex === -1 ? 0 : initialIndex;
-}
-
-export function Timeline({
-  title,
+function Root({
   items,
   initialYear,
+  opts,
+  plugins,
   className,
-}: TimelineProps) {
+  children,
+  ref,
+  ...rest
+}: RootProps) {
   const titleId = useId();
   const helpId = useId();
   const initialIndex = findInitialIndex(items, initialYear);
@@ -48,24 +64,28 @@ export function Timeline({
   const dragMovedRef = useRef(false);
   const pointerReleasedRef = useRef(false);
   const suppressYearClickRef = useRef(false);
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: "start",
-    breakpoints: {
-      "(prefers-reduced-motion: reduce)": { duration: 0 },
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    {
+      align: "start",
+      breakpoints: {
+        "(prefers-reduced-motion: reduce)": { duration: 0 },
+      },
+      containScroll: "trimSnaps",
+      dragFree: false,
+      inViewThreshold: 0.5,
+      loop: false,
+      skipSnaps: false,
+      slidesToScroll: 1,
+      startIndex: initialIndex,
+      watchDrag: (_api, event) =>
+        !(
+          event.target instanceof Element &&
+          event.target.closest("[data-timeline-year]")
+        ),
+      ...opts,
     },
-    containScroll: "trimSnaps",
-    dragFree: false,
-    inViewThreshold: 0.5,
-    loop: false,
-    skipSnaps: false,
-    slidesToScroll: 1,
-    startIndex: initialIndex,
-    watchDrag: (_api, event) =>
-      !(
-        event.target instanceof Element &&
-        event.target.closest("[data-timeline-year]")
-      ),
-  });
+    plugins,
+  );
 
   const matchingActiveIndex = items.findIndex(
     (item) => item.year === activeYear,
@@ -126,34 +146,6 @@ export function Timeline({
       setPreviewIndex(null);
     };
 
-    const getDragPreview = (api: EmblaApi) => {
-      const visibleSlides = api.slidesInView();
-      let index = dragPreviewIndexRef.current;
-      if (visibleSlides.length > 0 && !visibleSlides.includes(index)) {
-        index = Math.min(
-          Math.max(index, visibleSlides[0]),
-          visibleSlides[visibleSlides.length - 1],
-        );
-      }
-
-      const progress = api.scrollProgress();
-      const scrollSnaps = api.scrollSnapList();
-      let previewSnap = api.selectedScrollSnap();
-      for (let snapIndex = 0; snapIndex < scrollSnaps.length; snapIndex += 1) {
-        if (
-          Math.abs(scrollSnaps[snapIndex] - progress) <
-          Math.abs(scrollSnaps[previewSnap] - progress)
-        ) {
-          previewSnap = snapIndex;
-        }
-      }
-
-      return {
-        index,
-        snap: previewSnap,
-      };
-    };
-
     const commitDrag = (api: EmblaApi) => {
       if (!dragInProgressRef.current || !dragMovedRef.current) return false;
 
@@ -185,7 +177,7 @@ export function Timeline({
       if (!dragInProgressRef.current) return;
 
       dragMovedRef.current = true;
-      const preview = getDragPreview(api);
+      const preview = getDragPreview(api, dragPreviewIndexRef.current);
       dragPreviewIndexRef.current = preview.index;
       dragPreviewSnapRef.current = preview.snap;
       setPreviewIndex(preview.index);
@@ -211,7 +203,7 @@ export function Timeline({
     const handleSettle = (api: EmblaApi) => {
       if (!dragInProgressRef.current) return;
 
-      const preview = getDragPreview(api);
+      const preview = getDragPreview(api, dragPreviewIndexRef.current);
       dragPreviewIndexRef.current = preview.index;
       dragPreviewSnapRef.current = preview.snap;
       if (!commitDrag(api)) resetDrag();
@@ -232,93 +224,235 @@ export function Timeline({
     };
   }, [activeIndex, emblaApi, items]);
 
-  if (items.length === 0 || !activeItem) {
-    return (
-      <section className={cn(styles.root, className)} aria-labelledby={titleId}>
-        <h2 id={titleId} className={styles.title}>
-          {title}
-        </h2>
-        <p className={styles.emptyState}>События пока не добавлены.</p>
-      </section>
-    );
-  }
-
   return (
-    <section className={cn(styles.root, className)} aria-labelledby={titleId}>
-      <h2 id={titleId} className={styles.title}>
-        {title}
-      </h2>
-
-      <p id={helpId} className="sr-only">
-        Перетаскивайте шкалу мышью или пальцем. Выберите год, чтобы увидеть
-        связанные с ним события.
-      </p>
-
-      <div className={styles.navigation}>
-        <button
-          type="button"
-          className={styles.navigationButton}
-          onClick={selectPrevious}
-          disabled={activeIndex === 0}
-          aria-label="Выбрать предыдущий год"
-        >
-          <ArrowPlaceholder direction="left" />
-        </button>
-
-        <div
-          ref={emblaRef}
-          className={styles.viewport}
-          aria-describedby={helpId}
-        >
-          <div className={styles.track}>
-            {items.map((item, index) => {
-              const isActive = index === activeIndex;
-              const hasMarker = index === markerIndex;
-
-              return (
-                <div key={item.year} className={styles.slide}>
-                  <button
-                    type="button"
-                    data-timeline-year
-                    className={styles.year}
-                    onClick={() => selectYear(index)}
-                    aria-pressed={isActive}
-                    aria-label={`${item.year} год`}
-                  >
-                    {hasMarker ? (
-                      <span className={styles.marker} aria-hidden="true" />
-                    ) : null}
-                    <span className={styles.tick} aria-hidden="true" />
-                    <span className={styles.yearLabel}>{item.year}</span>
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <button
-          type="button"
-          className={styles.navigationButton}
-          onClick={selectNext}
-          disabled={activeIndex === items.length - 1}
-          aria-label="Выбрать следующий год"
-        >
-          <ArrowPlaceholder direction="right" />
-        </button>
-      </div>
-
-      <div className={styles.eventList} aria-live="polite" aria-atomic="true">
-        {activeItem.events.length > 0 ? (
-          activeItem.events.map((event) => (
-            <article key={event.id} className={styles.eventCard}>
-              {event.text}
-            </article>
-          ))
-        ) : (
-          <p className={styles.emptyState}>Для этого года нет событий.</p>
-        )}
-      </div>
-    </section>
+    <TimelineContext
+      value={{
+        items,
+        activeIndex,
+        markerIndex,
+        activeItem,
+        titleId,
+        helpId,
+        emblaRef,
+        selectPrevious,
+        selectNext,
+        selectYear,
+      }}
+    >
+      <section
+        {...rest}
+        ref={ref}
+        className={cn(styles.root, className)}
+        aria-labelledby={rest["aria-labelledby"] ?? titleId}
+      >
+        {items.length > 0 ? (
+          <p id={helpId} className="sr-only">
+            Перетаскивайте шкалу мышью или пальцем. Выберите год, чтобы увидеть
+            связанные с ним события.
+          </p>
+        ) : null}
+        {children}
+      </section>
+    </TimelineContext>
   );
 }
+
+function Title({ className, ref, ...rest }: TitleProps) {
+  const { titleId } = useTimeline();
+  return (
+    <h2
+      {...rest}
+      ref={ref}
+      id={rest.id ?? titleId}
+      className={cn(styles.title, className)}
+    />
+  );
+}
+
+function Navigation({ className, ref, ...rest }: NavigationProps) {
+  const { items } = useTimeline();
+  if (items.length === 0) return null;
+  return (
+    <div {...rest} ref={ref} className={cn(styles.navigation, className)} />
+  );
+}
+
+function Content({ className, ref, children, ...rest }: ContentProps) {
+  const { items, emblaRef, helpId } = useTimeline();
+  if (items.length === 0) return null;
+
+  return (
+    <div
+      {...rest}
+      ref={(node) => {
+        emblaRef(node);
+        if (typeof ref === "function") ref(node);
+        else if (ref) ref.current = node;
+      }}
+      className={cn(styles.viewport, className)}
+      aria-describedby={rest["aria-describedby"] ?? helpId}
+    >
+      <div className={styles.track}>{children}</div>
+    </div>
+  );
+}
+
+function Item({ year, className, ref, children, onClick, ...rest }: ItemProps) {
+  const { items, activeIndex, selectYear } = useTimeline();
+  const index = items.findIndex((item) => item.year === year);
+  if (index === -1) return null;
+
+  return (
+    <TimelineItemContext value={index}>
+      <div className={styles.slide}>
+        <button
+          {...rest}
+          ref={ref}
+          type={rest.type ?? "button"}
+          data-timeline-year
+          className={cn(styles.year, className)}
+          onClick={(event) => {
+            onClick?.(event);
+            if (!event.defaultPrevented) selectYear(index);
+          }}
+          aria-pressed={index === activeIndex}
+          aria-label={rest["aria-label"] ?? `${year} год`}
+        >
+          {children}
+        </button>
+      </div>
+    </TimelineItemContext>
+  );
+}
+
+function Dot({ className, ref, ...rest }: DotProps) {
+  const index = useTimelineItem();
+  const { markerIndex } = useTimeline();
+  if (index !== markerIndex) return null;
+  return (
+    <span
+      {...rest}
+      ref={ref}
+      className={cn(styles.marker, className)}
+      aria-hidden="true"
+    />
+  );
+}
+
+function Tick({ className, ref, ...rest }: TickProps) {
+  useTimelineItem();
+  return (
+    <span
+      {...rest}
+      ref={ref}
+      className={cn(styles.tick, className)}
+      aria-hidden="true"
+    />
+  );
+}
+
+function YearLabel({ className, ref, children, ...rest }: YearLabelProps) {
+  const index = useTimelineItem();
+  const { items } = useTimeline();
+  return (
+    <span {...rest} ref={ref} className={cn(styles.yearLabel, className)}>
+      {children ?? items[index].year}
+    </span>
+  );
+}
+
+function Previous({ className, ref, children, onClick, ...rest }: ArrowProps) {
+  const { activeIndex, items, selectPrevious } = useTimeline();
+  if (items.length === 0) return null;
+  return (
+    <button
+      {...rest}
+      ref={ref}
+      type={rest.type ?? "button"}
+      className={cn(styles.navigationButton, className)}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) selectPrevious();
+      }}
+      disabled={rest.disabled || activeIndex === 0}
+      aria-label={rest["aria-label"] ?? "Выбрать предыдущий год"}
+    >
+      {children ?? <ArrowPlaceholder direction="left" />}
+    </button>
+  );
+}
+
+function Next({ className, ref, children, onClick, ...rest }: ArrowProps) {
+  const { activeIndex, items, selectNext } = useTimeline();
+  if (items.length === 0) return null;
+  return (
+    <button
+      {...rest}
+      ref={ref}
+      type={rest.type ?? "button"}
+      className={cn(styles.navigationButton, className)}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) selectNext();
+      }}
+      disabled={rest.disabled || activeIndex === items.length - 1}
+      aria-label={rest["aria-label"] ?? "Выбрать следующий год"}
+    >
+      {children ?? <ArrowPlaceholder direction="right" />}
+    </button>
+  );
+}
+
+function Event({ className, ref, ...rest }: EventProps) {
+  return (
+    <article {...rest} ref={ref} className={cn(styles.eventCard, className)} />
+  );
+}
+
+function Empty({ className, ref, children, ...rest }: EmptyProps) {
+  const { items } = useTimeline();
+  if (items.length > 0) return null;
+  return (
+    <p {...rest} ref={ref} className={cn(styles.emptyState, className)}>
+      {children ?? "События пока не добавлены."}
+    </p>
+  );
+}
+
+function Events({ className, ref, children, ...rest }: EventsProps) {
+  const { activeItem } = useTimeline();
+  if (!activeItem) return null;
+  return (
+    <div
+      {...rest}
+      ref={ref}
+      className={cn(styles.eventList, className)}
+      aria-live={rest["aria-live"] ?? "polite"}
+      aria-atomic={rest["aria-atomic"] ?? "true"}
+    >
+      {activeItem.events.length > 0
+        ? activeItem.events.map((event) => (
+            <Event key={event.id}>{event.text}</Event>
+          ))
+        : (children ?? (
+            <p className={styles.emptyState}>Для этого года нет событий.</p>
+          ))}
+    </div>
+  );
+}
+
+export const Timeline = Object.assign(Root, {
+  Root,
+  Title,
+  Navigation,
+  Content,
+  Item,
+  Dot,
+  Tick,
+  YearLabel,
+  Previous,
+  Next,
+  Event,
+  Events,
+  Empty,
+});

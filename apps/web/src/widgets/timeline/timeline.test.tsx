@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
+import { createRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Timeline } from "./timeline";
 import type { TimelineYear } from "./types";
@@ -82,7 +83,24 @@ const items: readonly TimelineYear[] = years.map((year) => ({
 
 function renderTimeline(initialYear?: number) {
   return render(
-    <Timeline title="Timeline" items={items} initialYear={initialYear} />,
+    <Timeline.Root items={items} initialYear={initialYear}>
+      <Timeline.Title>Timeline</Timeline.Title>
+      <Timeline.Navigation>
+        <Timeline.Previous />
+        <Timeline.Content>
+          {items.map((item) => (
+            <Timeline.Item key={item.year} year={item.year}>
+              <Timeline.Dot />
+              <Timeline.Tick />
+              <Timeline.YearLabel />
+            </Timeline.Item>
+          ))}
+        </Timeline.Content>
+        <Timeline.Next />
+      </Timeline.Navigation>
+      <Timeline.Events />
+      <Timeline.Empty />
+    </Timeline.Root>,
   );
 }
 
@@ -125,8 +143,52 @@ beforeEach(() => {
 });
 
 describe("Timeline", () => {
+  it("forwards refs, classes, and DOM props through compound parts", () => {
+    const rootRef = createRef<HTMLElement>();
+    const contentRef = createRef<HTMLDivElement>();
+    const itemRef = createRef<HTMLButtonElement>();
+
+    render(
+      <Timeline.Root
+        items={items}
+        ref={rootRef}
+        className="custom-root"
+        data-testid="timeline-root"
+      >
+        <Timeline.Title>Timeline</Timeline.Title>
+        <Timeline.Content
+          ref={contentRef}
+          className="custom-content"
+          data-testid="timeline-content"
+        >
+          <Timeline.Item
+            year={2005}
+            ref={itemRef}
+            className="custom-item"
+            data-testid="timeline-item"
+          >
+            <Timeline.Dot />
+            <Timeline.YearLabel />
+          </Timeline.Item>
+        </Timeline.Content>
+      </Timeline.Root>,
+    );
+
+    expect(rootRef.current).toBe(screen.getByTestId("timeline-root"));
+    expect(contentRef.current).toBe(screen.getByTestId("timeline-content"));
+    expect(itemRef.current).toBe(screen.getByTestId("timeline-item"));
+    expect(rootRef.current?.className).toContain("custom-root");
+    expect(contentRef.current?.className).toContain("custom-content");
+    expect(itemRef.current?.className).toContain("custom-item");
+  });
+
   it("renders an empty timeline without year buttons", () => {
-    render(<Timeline title="Empty timeline" items={[]} />);
+    render(
+      <Timeline.Root items={[]}>
+        <Timeline.Title>Empty timeline</Timeline.Title>
+        <Timeline.Empty />
+      </Timeline.Root>,
+    );
 
     expect(
       screen.getByRole("heading", { name: "Empty timeline" }),
